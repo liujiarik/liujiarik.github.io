@@ -61,7 +61,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Nginx," />
+  <meta name="keywords" content="Nginx,技术," />
 
 
 
@@ -77,19 +77,19 @@
 
 
 
-<meta name="description" content="Nginx 的配置简单的配置是Nginx是在站长中流行的一个最主要的原因，因为这样可以节省他们很多时间。简单得说，nginx的配置文件是简单的指令序列，而且这些指令都可以带上多达8个利用空格分开的参数。比如像如下那样：
-1gzip_types text/plain text/css application/x-javascript text/xml application/xml applicat">
+<meta name="description" content="简单的Nginx配置简单的配置是Nginx在站长圈中流行的一个最主要原因，因为这样可以节省他们很多时间。简单得说，nginx的配置文件是简单的指令序列，而且这些指令都可以带很多利用空格分开的参数。比如：
+1gzip_types text/plain text/css application/x-javascript text/xml application/xml application/xml+">
 <meta property="og:type" content="article">
-<meta property="og:title" content="理解Nginx的配置">
+<meta property="og:title" content="30分钟简单上手Nginx配置">
 <meta property="og:url" content="http://yoursite.com/2016/08/25/Nginx 的配置/index.html">
 <meta property="og:site_name" content="liujiarik的站">
-<meta property="og:description" content="Nginx 的配置简单的配置是Nginx是在站长中流行的一个最主要的原因，因为这样可以节省他们很多时间。简单得说，nginx的配置文件是简单的指令序列，而且这些指令都可以带上多达8个利用空格分开的参数。比如像如下那样：
-1gzip_types text/plain text/css application/x-javascript text/xml application/xml applicat">
-<meta property="og:updated_time" content="2016-08-25T06:35:22.000Z">
+<meta property="og:description" content="简单的Nginx配置简单的配置是Nginx在站长圈中流行的一个最主要原因，因为这样可以节省他们很多时间。简单得说，nginx的配置文件是简单的指令序列，而且这些指令都可以带很多利用空格分开的参数。比如：
+1gzip_types text/plain text/css application/x-javascript text/xml application/xml application/xml+">
+<meta property="og:updated_time" content="2016-08-25T10:12:54.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="理解Nginx的配置">
-<meta name="twitter:description" content="Nginx 的配置简单的配置是Nginx是在站长中流行的一个最主要的原因，因为这样可以节省他们很多时间。简单得说，nginx的配置文件是简单的指令序列，而且这些指令都可以带上多达8个利用空格分开的参数。比如像如下那样：
-1gzip_types text/plain text/css application/x-javascript text/xml application/xml applicat">
+<meta name="twitter:title" content="30分钟简单上手Nginx配置">
+<meta name="twitter:description" content="简单的Nginx配置简单的配置是Nginx在站长圈中流行的一个最主要原因，因为这样可以节省他们很多时间。简单得说，nginx的配置文件是简单的指令序列，而且这些指令都可以带很多利用空格分开的参数。比如：
+1gzip_types text/plain text/css application/x-javascript text/xml application/xml application/xml+">
 
 
 
@@ -112,7 +112,7 @@
 
   <link rel="canonical" href="http://yoursite.com/2016/08/25/Nginx 的配置/"/>
 
-  <title> 理解Nginx的配置 | liujiarik的站 </title>
+  <title> 30分钟简单上手Nginx配置 | liujiarik的站 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -232,7 +232,7 @@
             
             
               
-                理解Nginx的配置
+                30分钟简单上手Nginx配置
               
             
           </h1>
@@ -272,11 +272,11 @@
       
 
       
-        <h1 id="Nginx-的配置"><a href="#Nginx-的配置" class="headerlink" title="Nginx 的配置"></a>Nginx 的配置</h1><p>简单的配置是Nginx是在站长中流行的一个最主要的原因，因为这样可以节省他们很多时间。简单得说，nginx的配置文件是简单的指令序列，而且这些指令都可以带上多达8个利用空格分开的参数。比如像如下那样：</p>
+        <h1 id="简单的Nginx配置"><a href="#简单的Nginx配置" class="headerlink" title="简单的Nginx配置"></a>简单的Nginx配置</h1><p>简单的配置是Nginx在站长圈中流行的一个最主要原因，因为这样可以节省他们很多时间。简单得说，nginx的配置文件是简单的<strong>指令序列</strong>，而且这些指令都可以带很多利用空格分开的参数。比如：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">gzip_types text/plain text/css application/x-javascript text/xml application/xml application/xml+rss text/javascript;</div></pre></td></tr></table></figure>
-<p>在配置文件中，指令之间由表示分号<code>；</code>分隔。一些指令可能是利用一个区块来表示，而不是分号。其中，一个区块是由大括号<code>{}</code>分隔的。一个块可以包含任意的文本数据，例如：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">types &#123;</div><div class="line">    text/html		html htm shtml;</div><div class="line">    text/css		css;</div><div class="line">    text/xml		xml;</div><div class="line">    image/gif		gif;</div><div class="line">    image/jpeg		jpeg jpg;</div><div class="line">    application/x-javascript	js;</div><div class="line">    application/atom+xml	atom;</div><div class="line">    application/rss+xml		rss;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
-<p>一个区块也可以包含其他指令序列。在这种情况下，区块被称为小节。一个小节包含其他小节，从而建立带嵌套的层次结构配置文件。<br>令人欣慰的是，nginx的设计者将最重要的指令利用很短的指令名字来表示，这样可以减少使用者维护配置文件的成本。</p>
+<p>在配置文件中，指令之间由分号<code>；</code>分隔。一些指令可以利用一个区块来表示。而一个区块是由大括号<code>{}</code>分隔的。一个块可以包含任意的文本数据，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">types &#123;</div><div class="line">    text/html   html htm shtml;</div><div class="line">    text/css    css;</div><div class="line">    text/xml    xml;</div><div class="line">    image/gif   gif;</div><div class="line">    image/jpeg    jpeg jpg;</div><div class="line">    application/x-javascript  js;</div><div class="line">    application/atom+xml  atom;</div><div class="line">    application/rss+xml   rss;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<p>一个区块也可以包含其他指令序列。在这种情况下，区块被称为段(section)。一个段可以包含其他段，从而建立带嵌套的层次结构配置文件,段的具体内容会在下文讲诉。<br>令人欣慰的是，Nginx的设计者将最重要的指令利用很短的指令名字来表示，这样可以减少使用者维护配置文件的成本。</p>
 <h2 id="参数类型"><a href="#参数类型" class="headerlink" title="参数类型"></a>参数类型</h2><p>在一般情况下，一个指令可以有带引号或不带引号的字符串作为参数。但许多指令参数都具有一致的参数值类型，这些有点类似编程语言中的类型。为了帮助您快速了解Nginx的参数值类型，我将它们列在下表中：</p>
 <table>
 <thead>
@@ -314,7 +314,38 @@
 </tr>
 </tbody>
 </table>
-<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2>
+<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><p>变量是那些被一段文本值命名的对象，这点也和编程语言中的变量有一些类似，但是Nginx中的变量只能出现<code>http</code>段内。另外，变量引用是利用美元号<code>$</code>加上变量名称，这一点与Shell是类似的，为了不让变量名称和周围的文本混淆，可以利用<code>{}</code>来包裹变量以防止与周围的文本合并。<br>变量可以被使用在任何接受它们的指令中，如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">proxy_set_header Host $http_host;</div></pre></td></tr></table></figure>
+<p>也可以这样写：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">proxy_set_header Host $&#123;http_host&#125;;</div></pre></td></tr></table></figure>
+<p>然而，当我们的参数是变量加上一段字符串，那么我们就需要把这个变量给包裹起来，如下语句中，如果不将<code>http_host</code>包裹起来，那么Ngnix就认为文件需要获取的是名叫<code>http_host_squirrel</code>的变量，这肯定是和使用者的本意是违背的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">proxy_set_header Host $&#123;http_host&#125;_squirrel;</div></pre></td></tr></table></figure>
+<p>以上都是在描述变量使用的方法，然而，如果一个变量都没有定义和初始化，那说使用也是徒劳的。在实际的使用中，我们使用最多的是Ngnix提供的内建变量，就是Nginx已经给我们定义好的变量，开箱即用：</p>
+<ul>
+<li>从<code>$1</code>到<code>$9</code>的变量是请求中的正则表达式参数,如：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">location ~ /(.+)\.php$ &#123;</div><div class="line">                  [...]</div><div class="line">                  proxy_set_header X-Script-Name $1;</div><div class="line">              &#125;</div></pre></td></tr></table></figure>
+<p>上面的语句表示将Http头中的<code>X-Script-Name</code>设置为请求中的第一个正则表达式的参数。</p>
+<ul>
+<li>以<code>$arg_</code>开头的变量，会利用HTTP请求的查询参数来初始化，如：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">location ~ /index.php?ver=scri$ &#123;</div><div class="line">                  [...]</div><div class="line">                  proxy_set_header X-Script-Name $arg_ver;</div><div class="line">              &#125;</div></pre></td></tr></table></figure>
+<p>上面的例子中Nginx会将查询参数<code>ver</code>的值来初始化<code>$arg_ver</code>，这是一种约定俗成的规则，用户不要额外对这些参数进行初始化，这一点非常方便。</p>
+<ul>
+<li>以<code>$cookie_</code>开头的变量，会利用原始HTTP请求中cookie值来初始化。</li>
+</ul>
+<p>变量使用前，必须先由Nginx模块声明，而以上的内建变量其实也是Nginx的内建模块声明的，这些核心变量可以允许使用者对Http的请求进行处理，已完成自己关心的业务需求，更多的变量可以参考Nngix的官方文档。<br>当然，并不是只有内建模块才能声明变量，Nignx的第三方模块也可以申明属于自己的变量，具体的信息，可以通过第三方库的文档来获取。</p>
+<h2 id="包含"><a href="#包含" class="headerlink" title="包含"></a>包含</h2><p>我们在学习C语言的时候，肯定会使用到<code>include</code>来加载头文件或者其他库文件。Ngnix也支持利用<code>include</code>来加载其他配置文件的配置信息，这样的非常方便使用模块化的思想来配置Nginx。<br><code>include</code>指令也非常简单，只要后面跟上对应文件的路径就可以成功执行该文件包含的配置信息。其中，路径可以是相对路径也可以是绝对路径，需要注意的是，相对路径是针对包含<code>include</code>指令的配置文件而言的，而不是Nginx的根目录。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line">   * A simple relative inclusion. The target file&apos;s path</div><div class="line">   * is relative to the location of the current configuration file.</div><div class="line">   */</div><div class="line">  include mime.types;</div><div class="line">  /*</div><div class="line">   * A simple inclusion using an absolute path.</div><div class="line">   */</div><div class="line">  include /etc/nginx/conf/site-defaults.conf;</div></pre></td></tr></table></figure>
+<p>有时候，需要包含的配置文件太多，我们需要把他们全部包含过来。Ngnix建议的做法可以将这些文件放在同一个文件夹中，并使用如下的语句。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line">    * A simple glob inclusion. This will include all files</div><div class="line">    * ending on &quot;.conf&quot; located in /etc/nginx/sites-enabled</div><div class="line">    */</div><div class="line">   include /etc/nginx/sites-enabled/*.conf;</div></pre></td></tr></table></figure>
+<p>上面的语句，可以将sites-enabled文件夹下所有扩展名为<code>.conf</code>的文件全部包含。</p>
+<h2 id="段"><a href="#段" class="headerlink" title="段"></a>段</h2><p>段(section)是一种能包含其他指令的区块，每一个段的分隔符<code>{}</code>必须包含在同一个文件之中，而同一段中不同的指令可以利用<code>include</code>指令被不同的文件使用。<br>因为篇幅有限我不可能将所有的段都讲诉一篇，这篇文章的目的是让那些从未接触Nginx的同学快速入门，所以我们将介绍一些最为核心的段。</p>
+<h3 id="Http-Section"><a href="#Http-Section" class="headerlink" title="Http Section"></a>Http Section</h3><p><code>http</code>section可以配置Nginx的Http服务,一般而言，http section包含了其他的section 来保证完整的Http服务正常的运行。而且，http必须包含至少一个<code>server</code>section，不然http服务无法处理Http请求。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">http &#123; [...]</div><div class="line">        server &#123;</div><div class="line">            [...]</div><div class="line">    &#125; </div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>其中<code>[...]</code>代表着section中的其他配置。</p>
+<h4 id="Server-section"><a href="#Server-section" class="headerlink" title="Server section"></a>Server section</h4><p><code>server</code>section 可以利用<code>listen</code>指令来指定监听的端口，同时也可以利用<code>location</code>section来对不同的路径进行处理。</p>
+<h4 id="location-section"><a href="#location-section" class="headerlink" title="location section"></a>location section</h4>
       
     </div>
 
@@ -337,6 +368,8 @@
         <div class="post-tags">
           
             <a href="/tags/Nginx/" rel="tag">#Nginx</a>
+          
+            <a href="/tags/技术/" rel="tag">#技术</a>
           
         </div>
       
@@ -421,7 +454,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-count">2</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -450,7 +483,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Nginx-的配置"><span class="nav-number">1.</span> <span class="nav-text">Nginx 的配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#参数类型"><span class="nav-number">1.1.</span> <span class="nav-text">参数类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#变量"><span class="nav-number">1.2.</span> <span class="nav-text">变量</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简单的Nginx配置"><span class="nav-number">1.</span> <span class="nav-text">简单的Nginx配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#参数类型"><span class="nav-number">1.1.</span> <span class="nav-text">参数类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#变量"><span class="nav-number">1.2.</span> <span class="nav-text">变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#包含"><span class="nav-number">1.3.</span> <span class="nav-text">包含</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#段"><span class="nav-number">1.4.</span> <span class="nav-text">段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Http-Section"><span class="nav-number">1.4.1.</span> <span class="nav-text">Http Section</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Server-section"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">Server section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#location-section"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">location section</span></a></li></ol></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>
