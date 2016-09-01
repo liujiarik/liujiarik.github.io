@@ -228,6 +228,108 @@
             
               
                 
+                <a class="post-title-link" href="/2016/09/01/Nginx-lua-解析URL中参数的方法/" itemprop="url">
+                  Nginx_lua 解析URL中参数的方法
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-01T18:08:22+08:00" content="2016-09-01">
+              2016-09-01
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Nginx-lua-解析URL中参数的方法"><a href="#Nginx-lua-解析URL中参数的方法" class="headerlink" title="Nginx_lua 解析URL中参数的方法"></a>Nginx_lua 解析URL中参数的方法</h1><p>我们在做后端服务的时候，一般都会先规定好接口文档,根据这一个文档来做对应的开发。而且接口大部分都是带参数的，才能满足一定的业务需要。比如我们可以这样定义一个接口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/rest/person?id=223&amp;version=v1.0</div></pre></td></tr></table></figure>
+<p>这一个接口带了两个参数：一个是<code>version</code>，它代表接口的版本号；另外一个是<code>id</code>，它代表人员的标识。这样接口的定义，nginx提供了方便的变量来获取请求参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">location =/rest/person &#123;</div><div class="line">        default_type text/html;</div><div class="line">        set $Version $arg_version;</div><div class="line">        set $Id $arg_id;</div><div class="line">        content_by_lua_block &#123;</div><div class="line">            ngx.say(ngx.var.Version)</div><div class="line">            ngx.say(ngx.var.Id）</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>上面的代码描述了如何在nginx中配置这个URL，并解析该请求的参数，同时指定Lua脚本来处理这个请求。在代码中可以看到，Nginx自动将请求参数的构建成一个内建变量，而且是以<code>arg_</code>加上请求参数的变量名来命名的，这样非常方便我们在脚本中使用<code>ngx.var</code>来获取对应的请求参数。<br>然而有一些接口是这样规定的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/rest/v1.0/person/223</div></pre></td></tr></table></figure>
+<p>这样的接口和上面所提到的接口代表的是同一个意思，但是把和业务相关的参数放到了URL里面了，获取这样的参数，相对起来要麻烦一些。这里得使用正则表达式来匹配。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">location ~^/rest/[a-zA-Z][0-9]/person/[a-zA-Z][0-9]$&#123;</div><div class="line">        default_type text/html;</div><div class="line">        set $Version $1;</div><div class="line">        set $Id $2;</div><div class="line">        content_by_lua_block &#123;</div><div class="line">            ngx.say(ngx.var.Version)</div><div class="line">            ngx.say(ngx.var.Id）</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>代码中，使用了<code>~^/rest/[a-zA-Z][0-9]/person/[a-zA-Z][0-9]$</code>作为URL的匹配。需要注意的是，代码中把参数项利用匹配符代替，相对应的<code>$1</code>变量保存着第一次匹配值，<code>$2</code>代表第二次匹配值,这样就可以把URL的参数成功捕捉到。<br>如果同时存在上面两种约束规则的，我想读者应该很容易就把他们结合起来吧，这样的约束规则想必也满足了绝大部分的业务需要了，如果还有其他的需求，强大的正则表达式会满足你的。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/08/25/Nginx 的配置/" itemprop="url">
                   30分钟简单上手Nginx配置
                 </a>
@@ -414,7 +516,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">1</span>
+              <span class="site-state-item-count">2</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -424,7 +526,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

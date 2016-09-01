@@ -1,0 +1,575 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="-nginx -lua," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Nginx_lua 解析URL中参数的方法我们在做后端服务的时候，一般都会先规定好接口文档,根据这一个文档来做对应的开发。而且接口大部分都是带参数的，才能满足一定的业务需要。比如我们可以这样定义一个接口：
+1/rest/person?id=223&amp;amp;version=v1.0
+这一个接口带了两个参数：一个是version，它代表接口的版本号；另外一个是id，它代表人员的标识。这样接口的定义，n">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx_lua 解析URL中参数的方法">
+<meta property="og:url" content="http://yoursite.com/2016/09/01/Nginx-lua-解析URL中参数的方法/index.html">
+<meta property="og:site_name" content="liujiarik的站">
+<meta property="og:description" content="Nginx_lua 解析URL中参数的方法我们在做后端服务的时候，一般都会先规定好接口文档,根据这一个文档来做对应的开发。而且接口大部分都是带参数的，才能满足一定的业务需要。比如我们可以这样定义一个接口：
+1/rest/person?id=223&amp;amp;version=v1.0
+这一个接口带了两个参数：一个是version，它代表接口的版本号；另外一个是id，它代表人员的标识。这样接口的定义，n">
+<meta property="og:updated_time" content="2016-09-01T10:10:21.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nginx_lua 解析URL中参数的方法">
+<meta name="twitter:description" content="Nginx_lua 解析URL中参数的方法我们在做后端服务的时候，一般都会先规定好接口文档,根据这一个文档来做对应的开发。而且接口大部分都是带参数的，才能满足一定的业务需要。比如我们可以这样定义一个接口：
+1/rest/person?id=223&amp;amp;version=v1.0
+这一个接口带了两个参数：一个是version，它代表接口的版本号；另外一个是id，它代表人员的标识。这样接口的定义，n">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/09/01/Nginx-lua-解析URL中参数的方法/"/>
+
+  <title> Nginx_lua 解析URL中参数的方法 | liujiarik的站 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">liujiarik的站</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">简于形</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Nginx_lua 解析URL中参数的方法
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-01T18:08:22+08:00" content="2016-09-01">
+              2016-09-01
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Nginx-lua-解析URL中参数的方法"><a href="#Nginx-lua-解析URL中参数的方法" class="headerlink" title="Nginx_lua 解析URL中参数的方法"></a>Nginx_lua 解析URL中参数的方法</h1><p>我们在做后端服务的时候，一般都会先规定好接口文档,根据这一个文档来做对应的开发。而且接口大部分都是带参数的，才能满足一定的业务需要。比如我们可以这样定义一个接口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/rest/person?id=223&amp;version=v1.0</div></pre></td></tr></table></figure>
+<p>这一个接口带了两个参数：一个是<code>version</code>，它代表接口的版本号；另外一个是<code>id</code>，它代表人员的标识。这样接口的定义，nginx提供了方便的变量来获取请求参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">location =/rest/person &#123;</div><div class="line">        default_type text/html;</div><div class="line">        set $Version $arg_version;</div><div class="line">        set $Id $arg_id;</div><div class="line">        content_by_lua_block &#123;</div><div class="line">            ngx.say(ngx.var.Version)</div><div class="line">            ngx.say(ngx.var.Id）</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>上面的代码描述了如何在nginx中配置这个URL，并解析该请求的参数，同时指定Lua脚本来处理这个请求。在代码中可以看到，Nginx自动将请求参数的构建成一个内建变量，而且是以<code>arg_</code>加上请求参数的变量名来命名的，这样非常方便我们在脚本中使用<code>ngx.var</code>来获取对应的请求参数。<br>然而有一些接口是这样规定的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/rest/v1.0/person/223</div></pre></td></tr></table></figure>
+<p>这样的接口和上面所提到的接口代表的是同一个意思，但是把和业务相关的参数放到了URL里面了，获取这样的参数，相对起来要麻烦一些。这里得使用正则表达式来匹配。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">location ~^/rest/[a-zA-Z][0-9]/person/[a-zA-Z][0-9]$&#123;</div><div class="line">        default_type text/html;</div><div class="line">        set $Version $1;</div><div class="line">        set $Id $2;</div><div class="line">        content_by_lua_block &#123;</div><div class="line">            ngx.say(ngx.var.Version)</div><div class="line">            ngx.say(ngx.var.Id）</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>代码中，使用了<code>~^/rest/[a-zA-Z][0-9]/person/[a-zA-Z][0-9]$</code>作为URL的匹配。需要注意的是，代码中把参数项利用匹配符代替，相对应的<code>$1</code>变量保存着第一次匹配值，<code>$2</code>代表第二次匹配值,这样就可以把URL的参数成功捕捉到。<br>如果同时存在上面两种约束规则的，我想读者应该很容易就把他们结合起来吧，这样的约束规则想必也满足了绝大部分的业务需要了，如果还有其他的需求，强大的正则表达式会满足你的。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/nginx-lua/" rel="tag">#-nginx -lua</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/25/Nginx 的配置/" rel="next" title="30分钟简单上手Nginx配置">
+                <i class="fa fa-chevron-left"></i> 30分钟简单上手Nginx配置
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ocerie2vm.bkt.clouddn.com/avatar.jpg"
+               alt="liujiarik" />
+          <p class="site-author-name" itemprop="name">liujiarik</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">2</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Nginx-lua-解析URL中参数的方法"><span class="nav-number">1.</span> <span class="nav-text">Nginx_lua 解析URL中参数的方法</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">liujiarik</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
