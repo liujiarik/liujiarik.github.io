@@ -272,9 +272,8 @@
       
         
           
-            <h1 id="接地气讲诉：Orcale数据库如何将同步信息分发到ActiveMQ队列"><a href="#接地气讲诉：Orcale数据库如何将同步信息分发到ActiveMQ队列" class="headerlink" title="接地气讲诉：Orcale数据库如何将同步信息分发到ActiveMQ队列"></a>接地气讲诉：Orcale数据库如何将同步信息分发到ActiveMQ队列</h1><p>##前言<br>一开始接触Orcale数据库的同步技术，我内心是拒绝的，但是其解决了不少工作上的业务问题，还是有一定的成就感，尤其是企业级异构IT模块之间的同步问题。虽然被甲骨文绑在他们的战车之上，但是大家也是痛并快乐着（认真脸–b）。<br>说Oracle数据库的同步，那就不得不说一下<strong>Oracle Golden Gate</strong>：<br>Oracle Golden Gate软件是一种基于日志的结构化数据复制备份软件，它通过解析源数据库在线日志或归档日志获得数据的增量变化，再将这些变化应用到目标数据库，从而实现源数据库与目标数据库同步。Oracle Golden Gate可以在异构的IT基础结构（包括几乎 所有常用操作系统平台和数据库平台）之间实现大量数据<strong>亚秒一级</strong>的实时复制,从而在可以 在应急系统、在线报表、实时数据仓库供应、交易跟踪、数据同步、集中/分发、容灾、数 据库升级和移植、双业务中心等多个场景下应用。同时，Oracle Golden Gate 可以实现一 对一、广播(一对多)、聚合(多对一)、双向、点对点、级联等多种灵活的拓扑结构。<br>学习小众的技术，遇到最大的阻碍就是文档和资源。看官方文档觉得有点啰嗦，国内关于这类的技术资料确实太少。但是安装这块我不想在重复说明了，百度上也可以搜索到一些同学的好博文。所以我讲着重讲诉一下一些重要概念和步骤。</p>
-<p>##OGG数据同步的重要概念</p>
-<ul>
+            <h1 id="接地气讲诉：Orcale数据库如何将同步信息分发到ActiveMQ队列"><a href="#接地气讲诉：Orcale数据库如何将同步信息分发到ActiveMQ队列" class="headerlink" title="接地气讲诉：Orcale数据库如何将同步信息分发到ActiveMQ队列"></a>接地气讲诉：Orcale数据库如何将同步信息分发到ActiveMQ队列</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一开始接触Orcale数据库的同步技术，我内心是拒绝的，但是其解决了不少工作上的业务问题，还是有一定的成就感，尤其是企业级异构IT模块之间的同步问题。虽然被甲骨文绑在他们的战车之上，但是大家也是痛并快乐着（认真脸–b）。<br>说Oracle数据库的同步，那就不得不说一下<strong>Oracle Golden Gate</strong>：<br>Oracle Golden Gate软件是一种基于日志的结构化数据复制备份软件，它通过解析源数据库在线日志或归档日志获得数据的增量变化，再将这些变化应用到目标数据库，从而实现源数据库与目标数据库同步。Oracle Golden Gate可以在异构的IT基础结构（包括几乎 所有常用操作系统平台和数据库平台）之间实现大量数据<strong>亚秒一级</strong>的实时复制,从而在可以 在应急系统、在线报表、实时数据仓库供应、交易跟踪、数据同步、集中/分发、容灾、数 据库升级和移植、双业务中心等多个场景下应用。同时，Oracle Golden Gate 可以实现一 对一、广播(一对多)、聚合(多对一)、双向、点对点、级联等多种灵活的拓扑结构。<br>学习小众的技术，遇到最大的阻碍就是文档和资源。看官方文档觉得有点啰嗦，国内关于这类的技术资料确实太少。但是安装这块我不想在重复说明了，百度上也可以搜索到一些同学的好博文。所以我讲着重讲诉一下一些重要概念和步骤。</p>
+<h2 id="OGG数据同步的重要概念"><a href="#OGG数据同步的重要概念" class="headerlink" title="OGG数据同步的重要概念"></a>OGG数据同步的重要概念</h2><ul>
 <li>oracle归档和日志<br>Oacle归档模式是ORACLE热备份的<strong>必要条件</strong>，特别是7X24生产的数据库。可以这么认为：归档日志是增量同步的数据源，因此必须开启。可以通过下面的的指令查看是否开了归档：</li>
 </ul>
 <figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">SQL&gt; archive log list</div></pre></td></tr></table></figure>
@@ -290,7 +289,7 @@
 <li><p>管理进程<br>顾名思义，管理进程就是可以对其他所有的进程进行管理，任务调度。一个OGG服务中只有一个管理进程，但是可以拥有多个其他进程。</p>
 </li>
 </ul>
-<p>##配置Ogg抽取进程<br>配置Ogg抽取进程之前，我们假定OGG已经安装成功，而且环境变量已经设置正确。<br>在OGG的安装目录下打开Ogg交互命令终端，这个终端草鸡不好用的，不能后退，不能查看历史命令，打错了一个字母，要重新打整个命令，强烈建议，命令先在记事本中写好，然后Copy过去。（甲骨文药丸~）</p>
+<h2 id="配置Ogg抽取进程"><a href="#配置Ogg抽取进程" class="headerlink" title="配置Ogg抽取进程"></a>配置Ogg抽取进程</h2><p>配置Ogg抽取进程之前，我们假定OGG已经安装成功，而且环境变量已经设置正确。<br>在OGG的安装目录下打开Ogg交互命令终端，这个终端草鸡不好用的，不能后退，不能查看历史命令，打错了一个字母，要重新打整个命令，强烈建议，命令先在记事本中写好，然后Copy过去。（甲骨文药丸~）</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./ggsci</div></pre></td></tr></table></figure>
 <p>1.生成必要文件夹<br>这一步，主要是生成一些OGG服务需要的文件夹，这些文件夹是OGG服务的默认路径，比如，<code>dirprm</code>文件夹保存这各种参数文件，ogg会默认从这个文件夹中读取运行参数。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GGSCI &gt; create subdirs</div></pre></td></tr></table></figure>
@@ -308,7 +307,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">GGSCI &gt; info all</div><div class="line">Program     Status     Group       Lag at Chkpt  Time Since Chkpt</div><div class="line">MANAGER     RUNNING</div></pre></td></tr></table></figure>
 <p>3.启动抽取进程</p>
 <ul>
-<li>配置管理进程参数<br>和启动管理进程一致，首先编辑参数文件</li>
+<li>配置进程参数<br>和启动管理进程一致，首先编辑参数文件</li>
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">GGSCI &gt; edit params extnd</div><div class="line"></div><div class="line">Extract extnd</div><div class="line">Exttrail ./dirdat/r1</div><div class="line">userid ogg,password ogg1234</div><div class="line">setenv (NLS_LANG=AMERICAN_AMERICA.ZHS16GBK)</div><div class="line">tranlogoptions integratedparams (max_sga_size 128)</div><div class="line">Table HR.UESR;</div></pre></td></tr></table></figure>
 <p>其中<code>extnd</code>是抽取进程的名字，这个是用户自己定义，需要注意的是名字不能超过<code>8个字符</code>，不然无法启动。<br><code>userid ogg,password ogg1234</code> 是配置Oracle数据的用户名和密码，需要这些才能正常登录数据库，获取信息，这里假设用户名是ogg，密码为ogg1234。<br><code>Extract</code> 标识这段参数，是对应哪个进程；<code>Exttrail</code> 是指定trail文件保存路径；<code>Table</code>指定了需要同步的源表名。其他的参数感兴趣的可以自行了解，我只将一下自定义较强的参数。<br>设置了extnd 参数并不能简单就把抽取进程启动，要做的工作还是很多，本人也在这趟了很多坑：</p>
@@ -336,13 +335,13 @@
 <p>很多人也许并不会成功启动任务，多大是因为配置文件的原因。可以利用</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GGSCI&gt;view report extnd</div></pre></td></tr></table></figure>
 <p>来查看extnd启动时的日志信息，根据其输出的结果来分析结果，正常启动的抽取进程状态是running的。</p>
-<p>4.启动传输进程</p>
+<h2 id="配置Ogg传输进程"><a href="#配置Ogg传输进程" class="headerlink" title="配置Ogg传输进程"></a>配置Ogg传输进程</h2><p>4.启动传输进程</p>
 <p>和抽取进程类似首先是配置传输进程</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">GGSCI&gt;edit params pvtnd</div><div class="line">EXTRACT pvtnd</div><div class="line">SETENV(NLS_LANG = &quot;AMERICAN_AMERICA.ZHS16GBK&quot;)</div><div class="line">userid ogg,password ogg1234</div><div class="line">rmthost 10.23.12.33, mgrport 8808</div><div class="line">rmttrail ./dirdat/r2</div><div class="line">passthru  </div><div class="line">Table HR.UESR;</div></pre></td></tr></table></figure>
 <p>进程pvtnd是任务就是将trail文件传输到<code>rmthost 10.23.12.33, mgrport 8808</code>这个节点上，该节点需要启动OGG服务，同时该节点的管理进程需要监听<code>8808</code>端口。这个就是上文为什么配置管理进程的端口，<strong>通过OGG可以实现一个拓扑结构同步机制</strong>。想想都灰常牛逼</p>
 <p>接着可以添加和启动传输进程：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">GGSCI&gt;add extract pvtnd, exttrailsource ./dirdat/r1</div><div class="line">GGSCI&gt;add rmttrail ./dirdat/r2, Extract pvtnd, megabytes 10</div><div class="line">GGSCI&gt;start extract pvt_demo</div></pre></td></tr></table></figure>
-<p>4.启动分发进程<br>分发进程的负责将trail分发到队列，这里OGG分发进程会应用JMS服务，将同步信息转化成消息，分到队列。这个也是整个服务的『最后一公里』。</p>
+<h2 id="配置Ogg分发进程"><a href="#配置Ogg分发进程" class="headerlink" title="配置Ogg分发进程"></a>配置Ogg分发进程</h2><p>4.启动分发进程<br>分发进程的负责将trail分发到队列，这里OGG分发进程会应用JMS服务，将同步信息转化成消息，分到队列。这个也是整个服务的『最后一公里』。</p>
 <ul>
 <li>定义Ogg环境参数</li>
 </ul>
