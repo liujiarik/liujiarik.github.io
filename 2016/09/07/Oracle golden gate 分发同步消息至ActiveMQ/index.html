@@ -61,7 +61,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Orcale,ActiveMQ,同步,分布式," />
 
 
 
@@ -77,12 +77,19 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="liujiarik的站">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="#如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ
+引言Oracle golden gate是甲骨文推出的一款数据库同步软件，可以实现异构数据库之间的亚秒级同步，它不仅仅支持Oracle，还支持Mysql和一些业界常用数据库。Ogg可以自动抽取表级数据的动态变化，直接将同步信息作用于目标数据库。然而，在某一些场景之中，我们并不需要将同步信息直接作用于目标数据库，而">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ">
+<meta property="og:url" content="http://yoursite.com/2016/09/07/Oracle golden gate 分发同步消息至ActiveMQ/index.html">
 <meta property="og:site_name" content="liujiarik的站">
+<meta property="og:description" content="#如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ
+引言Oracle golden gate是甲骨文推出的一款数据库同步软件，可以实现异构数据库之间的亚秒级同步，它不仅仅支持Oracle，还支持Mysql和一些业界常用数据库。Ogg可以自动抽取表级数据的动态变化，直接将同步信息作用于目标数据库。然而，在某一些场景之中，我们并不需要将同步信息直接作用于目标数据库，而">
+<meta property="og:updated_time" content="2016-09-29T09:04:46.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="liujiarik的站">
+<meta name="twitter:title" content="如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ">
+<meta name="twitter:description" content="#如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ
+引言Oracle golden gate是甲骨文推出的一款数据库同步软件，可以实现异构数据库之间的亚秒级同步，它不仅仅支持Oracle，还支持Mysql和一些业界常用数据库。Ogg可以自动抽取表级数据的动态变化，直接将同步信息作用于目标数据库。然而，在某一些场景之中，我们并不需要将同步信息直接作用于目标数据库，而">
 
 
 
@@ -103,9 +110,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/09/07/Oracle golden gate 分发同步消息至ActiveMQ/"/>
 
-  <title> liujiarik的站 </title>
+  <title> 如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ | liujiarik的站 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -126,9 +133,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -205,9 +210,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
   
@@ -227,10 +232,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2016/09/07/Oracle golden gate 分发同步消息至ActiveMQ/" itemprop="url">
-                  如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ
-                </a>
+                如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ
               
             
           </h1>
@@ -270,9 +272,7 @@
       
 
       
-        
-          
-            <p>#如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ</p>
+        <p>#如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ</p>
 <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>Oracle golden gate是甲骨文推出的一款数据库同步软件，可以实现异构数据库之间的亚秒级同步，它不仅仅支持Oracle，还支持Mysql和一些业界常用数据库。Ogg可以自动抽取表级数据的动态变化，直接将同步信息作用于目标数据库。然而，在某一些场景之中，我们并不需要将同步信息直接作用于目标数据库，而是将其保存在队列中，然后在队列中取出这些信息，完成一些下游系统的业务需求，这样可以让增量同步更加灵活。本篇文章主要讲述如何，配置Ogg来抽取源表的同步信息生成trail文件（Ogg专属同步文件），并利用分发器读取trail文件，适配成可以解析的xml，将其作为消息发送给队列。本文将不再讲诉一下关于安装的步骤，直接上干货。</p>
 <p>##OGG数据同步的重要概念</p>
 <ul>
@@ -374,138 +374,71 @@ ggsci &gt;info ext_demo
 ----添加进程，指向对应的trail文件,trail文件是上文生成的文件。
 </code></pre><p>ggsci &gt;ADD extract jue_demo, extTrailSource ./dirdat/a1<br>ggsci &gt;start extract jue_demo<br>```<br>如果启动成功了jue_demo就是在running状态。只有当抽取进程和分发进程同时在running状态，队列才能正确获取到同步消息。</p>
 
-          
+      
+    </div>
+
+    <div>
+      
         
+
       
     </div>
 
     <div>
       
-    </div>
+        
 
-    <div>
       
     </div>
 
     <footer class="post-footer">
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/01/Nginx-lua-解析URL中参数的方法/" itemprop="url">
-                  Nginx_lua 解析URL中参数的方法
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-09-01T18:08:22+08:00" content="2016-09-01">
-              2016-09-01
-            </time>
-          </span>
-
+        <div class="post-tags">
           
-
+            <a href="/tags/Orcale/" rel="tag">#Orcale</a>
           
-            
+            <a href="/tags/ActiveMQ/" rel="tag">#ActiveMQ</a>
           
-
+            <a href="/tags/同步/" rel="tag">#同步</a>
           
-
-          
-          
-
+            <a href="/tags/分布式/" rel="tag">#分布式</a>
           
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          
-            <h1 id="Nginx-lua-解析URL中参数的方法"><a href="#Nginx-lua-解析URL中参数的方法" class="headerlink" title="Nginx_lua 解析URL中参数的方法"></a>Nginx_lua 解析URL中参数的方法</h1><p>我们在做后端服务的时候，一般都会先规定好接口文档,根据这一个文档来做对应的开发。而且接口大部分都是带参数的，才能满足一定的业务需要。比如我们可以这样定义一个接口：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/rest/person?id=223&amp;version=v1.0</div></pre></td></tr></table></figure>
-<p>这一个接口带了两个参数：一个是<code>version</code>，它代表接口的版本号；另外一个是<code>id</code>，它代表人员的标识。这样接口的定义，nginx提供了方便的变量来获取请求参数</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">location =/rest/person &#123;</div><div class="line">        default_type text/html;</div><div class="line">        set $Version $arg_version;</div><div class="line">        set $Id $arg_id;</div><div class="line">        content_by_lua_block &#123;</div><div class="line">            ngx.say(ngx.var.Version)</div><div class="line">            ngx.say(ngx.var.Id）</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-<p>上面的代码描述了如何在nginx中配置这个URL，并解析该请求的参数，同时指定Lua脚本来处理这个请求。在代码中可以看到，Nginx自动将请求参数的构建成一个内建变量，而且是以<code>arg_</code>加上请求参数的变量名来命名的，这样非常方便我们在脚本中使用<code>ngx.var</code>来获取对应的请求参数。<br>然而有一些接口是这样规定的</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/rest/v1.0/person/223</div></pre></td></tr></table></figure>
-<p>这样的接口和上面所提到的接口代表的是同一个意思，但是把和业务相关的参数放到了URL里面了，获取这样的参数，相对起来要麻烦一些。这里得使用正则表达式来匹配。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">location ~^/rest/[a-zA-Z][0-9]/person/[a-zA-Z][0-9]$&#123;</div><div class="line">        default_type text/html;</div><div class="line">        set $Version $1;</div><div class="line">        set $Id $2;</div><div class="line">        content_by_lua_block &#123;</div><div class="line">            ngx.say(ngx.var.Version)</div><div class="line">            ngx.say(ngx.var.Id）</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-<p>代码中，使用了<code>~^/rest/[a-zA-Z][0-9]/person/[a-zA-Z][0-9]$</code>作为URL的匹配。需要注意的是，代码中把参数项利用匹配符代替，相对应的<code>$1</code>变量保存着第一次匹配值，<code>$2</code>代表第二次匹配值,这样就可以把URL的参数成功捕捉到。<br>如果同时存在上面两种约束规则的，我想读者应该很容易就把他们结合起来吧，这样的约束规则想必也满足了绝大部分的业务需要了，如果还有其他的需求，强大的正则表达式会满足你的。</p>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/01/Nginx-lua-解析URL中参数的方法/" rel="next" title="Nginx_lua 解析URL中参数的方法">
+                <i class="fa fa-chevron-left"></i> Nginx_lua 解析URL中参数的方法
+              </a>
+            
+          </div>
 
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
       
 
       
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
 
 
           </div>
@@ -513,6 +446,10 @@ ggsci &gt;info ext_demo
 
 
           
+  <div class="comments" id="comments">
+    
+  </div>
+
 
         </div>
         
@@ -532,8 +469,17 @@ ggsci &gt;info ext_demo
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="http://ocerie2vm.bkt.clouddn.com/avatar.jpg"
@@ -576,6 +522,17 @@ ggsci &gt;info ext_demo
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#让表可logging"><span class="nav-number">2.</span> <span class="nav-text">让表可logging</span></a></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -679,6 +636,10 @@ ggsci &gt;info ext_demo
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
 
   
 
