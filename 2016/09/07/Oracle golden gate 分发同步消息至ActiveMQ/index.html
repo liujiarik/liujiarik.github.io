@@ -84,7 +84,7 @@
 <meta property="og:site_name" content="liujiarik的站">
 <meta property="og:description" content="如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ引言Oracle golden gate是甲骨文推出的一款数据库同步软件，可以实现异构数据库之间的亚秒级同步，它不仅仅支持Oracle，还支持Mysql和一些业界常用数据库。Ogg可以自动抽取表级数据的动态变化，直接将同步信息作用于目标数据库。然而，在某一些场景之中，我们并不需要将同步信息直接作用于目标数据库，而是将">
 <meta property="og:image" content="http://ocerie2vm.bkt.clouddn.com/GUID-93A1AB03-B79A-4451-86DA-3040C3ABD12E-default.gif">
-<meta property="og:updated_time" content="2016-09-29T09:25:32.000Z">
+<meta property="og:updated_time" content="2016-09-29T09:26:19.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ">
 <meta name="twitter:description" content="如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ引言Oracle golden gate是甲骨文推出的一款数据库同步软件，可以实现异构数据库之间的亚秒级同步，它不仅仅支持Oracle，还支持Mysql和一些业界常用数据库。Ogg可以自动抽取表级数据的动态变化，直接将同步信息作用于目标数据库。然而，在某一些场景之中，我们并不需要将同步信息直接作用于目标数据库，而是将">
@@ -273,10 +273,7 @@
       
         <h1 id="如何利用Oracle-golden-gate-分发数据库同步消息至ActiveMQ"><a href="#如何利用Oracle-golden-gate-分发数据库同步消息至ActiveMQ" class="headerlink" title="如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ"></a>如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>Oracle golden gate是甲骨文推出的一款数据库同步软件，可以实现异构数据库之间的亚秒级同步，它不仅仅支持Oracle，还支持Mysql和一些业界常用数据库。Ogg可以自动抽取表级数据的动态变化，直接将同步信息作用于目标数据库。然而，在某一些场景之中，我们并不需要将同步信息直接作用于目标数据库，而是将其保存在队列中，然后在队列中取出这些信息，完成一些下游系统的业务需求，这样可以让增量同步更加灵活。本篇文章主要讲述如何，配置Ogg来抽取源表的同步信息生成trail文件（Ogg专属同步文件），并利用分发器读取trail文件，适配成可以解析的xml，将其作为消息发送给队列。本文将不再讲诉一下关于安装的步骤，直接上干货。</p>
 <h2 id="OGG数据同步的重要概念"><a href="#OGG数据同步的重要概念" class="headerlink" title="OGG数据同步的重要概念"></a>OGG数据同步的重要概念</h2><ul>
-<li>oracle归档和日志<br>Oacle归档模式是ORACLE热备份的<strong>必要条件</strong>，特别是7X24生产的数据库。可以这么认为：归档日志是增量同步的数据源，因此必须开启。可以通过下面的的指令查看是否开了归档：</li>
-</ul>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">SQL&gt; archive log list</div></pre></td></tr></table></figure>
-<ul>
+<li>oracle归档和日志<br>Oacle归档模式是ORACLE热备份的<strong>必要条件</strong>，特别是7X24生产的数据库。可以这么认为：归档日志是增量同步的数据源，因此必须开启。可以通过下面的的指令查看是否开了归档：<br>SQL&gt; archive log list</li>
 <li><p>Ogg抽取进程<br>开启了归档和日志，ogg就有数据源来获取同步信息。而具体的工作是由Ogg抽取进程来完成的，抽取进程将需要同步表的日志文件抽取成trail文件。而<strong>trail文件就是Ogg专属的记录文件，它保存了表级的更新信息。trail是『痕迹』的意思，其实这个单词也很好诠释了这个文件所要维护的信息</strong>。</p>
 </li>
 <li><p>Ogg传输进程<br>抽取进程生成了trail文件，<strong>trail文件保留了表级的更新信息，我们可以利用这个trail文件来恢复目标表</strong>。一般而言，目标表所在的数据库并不是和源表在同一个物理机之上，因此，ogg提供了一个传输进程来将trail传输到目标机器上，同时，目标机器上也运行着Ogg服务，将trail中的信息转化成数据库动作，完成数据同步。在这里，我的目标其实ActiveMq队列，因此，只要将同步信息分发到队列中，那就完成了我们的工作。</p>
