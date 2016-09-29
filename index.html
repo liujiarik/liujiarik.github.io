@@ -288,68 +288,96 @@
 <h2 id="让表可logging"><a href="#让表可logging" class="headerlink" title="让表可logging"></a>让表可logging</h2><p>Ogg的实质是读取Oracle表在更新之时生成的 redo log。redo log是记录事务已经commit的动作，所以我们不需要考虑更新的事务性。我们可以将有同步需求的表开启logging。没有开启logging的表是无法被Ogg获取到同步信息的，注意Oracle数据库先要开启归档模式。</p>
 </li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sql&gt;alter table  OGG_TEST1 logging;</div></pre></td></tr></table></figure>
-<p>利用以上的语句可以开启OGG_TEST1这个表的logging状态。<br>同时，需要将同步信息添加到OGG：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ggsci &gt; add trandata OGG_TEST1</div><div class="line">```ggsci是ogg提供的交互终端，在ogg根目录输入./ggsci就可以进入。也可以利用下面的语句查看是否成功添加成功：</div></pre></td></tr></table></figure>
-<p>ggsci&gt;info trandata OGG_TEST1</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">## 生成必要文件夹开启Manager进程</div><div class="line">进入交互终端</div></pre></td></tr></table></figure>
-<p>./ggsci<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">1.生成必要文件夹</div><div class="line">这一步，主要是生成一些OGG服务需要的文件夹，这些文件夹是OGG服务的默认路径，比如，`dirprm`文件夹保存这各种参数文件，ogg会默认从这个文件夹中读取运行参数。</div></pre></td></tr></table></figure></p>
-<p>ggsci &gt; create subdirs<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2.启动管理进程</div><div class="line">启动管理进程是配置其他进程的第一步，不然没法启动其他进程。</div><div class="line"></div><div class="line">* 配置管理进程参数</div></pre></td></tr></table></figure></p>
-<p>GGSCI &gt; edit params mgr</p>
-<p>port 7839<br>DYNAMICPORTLIST 7840-7850<br>AUTOSTART EXTRACT <em><br>AUTORESTART EXTRACT </em><br>PURGEOLDEXTRACTS ./dirdat/*,usecheckpoints, minkeepdays 7<br>LAGREPORTHOURS 1<br>LAGINFOMINUTES 30<br>LAGCRITICALMINUTES 45</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">需要注意的是：</div><div class="line">`PORT`：指定服务监听端口；这里以7839为例，默认端口为7809</div><div class="line">`DYNAMICPORTLIST`：动态端口：可以制定最大256个可用端口的动态列表，当指定的端口不可用时，管理进程将会从列表中选择一个可用的端口，源端和目标段的Collector、Replicat、GGSCI进程通信也会使用这些端口；</div><div class="line">`COMMENT`：注释行，也可以用--来代替;</div><div class="line">`AUTOSTART`：指定在管理进程启动时自动启动哪些进程；</div><div class="line">`AUTORESTART`：自动重启参数设置：本处设置表示每7分钟尝试重新启动所有EXTRACT进程，共尝试5次；</div><div class="line">`PURGEOLDEXTRACTS`：定期清理trail文件设置：本处设置表示对于超过3天的trail文件进行删除。</div><div class="line">`LAGREPORT`、`LAGINFO`、`LAGCRITICAL`：</div><div class="line">定义数据延迟的预警机制：本处设置表示MGR进程每隔1小时检查EXTRACT的延迟情况，如果超过了30分钟就把延迟作为信息记录到错误日志中，如果延迟超过了45分钟，则把它作为警告写到错误日志中。</div><div class="line"></div><div class="line">* 启动</div></pre></td></tr></table></figure>
-<p>GGSCI &gt; start mgr<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">启动成功之后可以利用一下指令查看所有进程的info，可以看到`MANAGER`进程已经成功启动：</div></pre></td></tr></table></figure></p>
-<p>GGSCI &gt; info all<br>Program     Status     Group       Lag at Chkpt  Time Since Chkpt<br>MANAGER     RUNNING<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">## Extract进程Extract抽取进程是将redo log转化成trail文件的一个必要的过程。Trail文件是一种的特殊的文件格式，它有自己专属的文件头，包含了格式化的同步信息，默认情况下抽取进程是以追加的形式将更新信息包含在此，了解更多请移步官方文档添加这样的进程，首先需要编写它的配置文件：ggsci&gt;edit param ext_demoext_demo是我们取的一个进程名字，ogg规定进程名字不能超过8个字符。ggsci会在dirprm文件夹下新建ext_demo.prm文件。该文件就是来描述ext_demo进程的配置。其他进程也是同理，都是利用prm配置文件来维护配置信息。在ggsci下可以直接输入prm文件内容：</div></pre></td></tr></table></figure></p>
-<p>Extract ext_demo<br>Exttrail ./dirdat/a1<br>userid  xxx  password xxx<br>setenv (NLS_LANG=AMERICAN_AMERICA.ZHS16GBK)<br>getEnv (JAVA_HOME)<br>getEnv (LD_LIBRARY_PATH)<br>getEnv (PATH)<br>Table  OGG_TEST1;</p>
-<pre><code>
-需要注意的是，Exttrail是生成trail文件的地址，a1是trail文件名称，ogg规定trail文件名称不能超过2个字符。Table 表示是需要抽取表，userid  xxx  password xxx  是数据库的用户名和密码。
-配置完抽取进程，把进程启动起来仍需要一下的指令： 
---添加进程
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sql&gt;alter table  OGG_TEST1 logging;</div><div class="line">```利用以上的语句可以开启OGG_TEST1这个表的logging状态。同时，需要将同步信息添加到OGG：</div></pre></td></tr></table></figure>
+<p>ggsci &gt; add trandata OGG_TEST1</p>
+<pre><code>ggsci是ogg提供的交互终端，在ogg根目录输入./ggsci就可以进入。也可以利用下面的语句查看是否成功添加成功：
 
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ggsci&gt;info trandata OGG_TEST1</div></pre></td></tr></table></figure>
+
+## 生成必要文件夹开启Manager进程
+进入交互终端
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./ggsci</div></pre></td></tr></table></figure>
+
+1.生成必要文件夹
+这一步，主要是生成一些OGG服务需要的文件夹，这些文件夹是OGG服务的默认路径，比如，`dirprm`文件夹保存这各种参数文件，ogg会默认从这个文件夹中读取运行参数。
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ggsci &gt; create subdirs</div></pre></td></tr></table></figure>
+
+2.启动管理进程
+启动管理进程是配置其他进程的第一步，不然没法启动其他进程。
+
+* 配置管理进程参数
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">GGSCI &gt; edit params mgr</div><div class="line">port 7839 </div><div class="line">DYNAMICPORTLIST 7840-7850</div><div class="line">AUTOSTART EXTRACT *</div><div class="line">AUTORESTART EXTRACT *</div><div class="line">PURGEOLDEXTRACTS ./dirdat/*,usecheckpoints, minkeepdays 7</div><div class="line">LAGREPORTHOURS 1</div><div class="line">LAGINFOMINUTES 30</div><div class="line">LAGCRITICALMINUTES 45</div></pre></td></tr></table></figure>
+
+需要注意的是：
+`PORT`：指定服务监听端口；这里以7839为例，默认端口为7809
+`DYNAMICPORTLIST`：动态端口：可以制定最大256个可用端口的动态列表，当指定的端口不可用时，管理进程将会从列表中选择一个可用的端口，源端和目标段的Collector、Replicat、GGSCI进程通信也会使用这些端口；
+`COMMENT`：注释行，也可以用--来代替;
+`AUTOSTART`：指定在管理进程启动时自动启动哪些进程；
+`AUTORESTART`：自动重启参数设置：本处设置表示每7分钟尝试重新启动所有EXTRACT进程，共尝试5次；
+`PURGEOLDEXTRACTS`：定期清理trail文件设置：本处设置表示对于超过3天的trail文件进行删除。
+`LAGREPORT`、`LAGINFO`、`LAGCRITICAL`：
+定义数据延迟的预警机制：本处设置表示MGR进程每隔1小时检查EXTRACT的延迟情况，如果超过了30分钟就把延迟作为信息记录到错误日志中，如果延迟超过了45分钟，则把它作为警告写到错误日志中。
+
+* 启动
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GGSCI &gt; start mgr</div></pre></td></tr></table></figure>
+
+启动成功之后可以利用一下指令查看所有进程的info，可以看到`MANAGER`进程已经成功启动：
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">GGSCI &gt; info all</div><div class="line">Program     Status     Group       Lag at Chkpt  Time Since Chkpt</div><div class="line">MANAGER     RUNNING</div><div class="line">```## Extract进程Extract抽取进程是将redo log转化成trail文件的一个必要的过程。Trail文件是一种的特殊的文件格式，它有自己专属的文件头，包含了格式化的同步信息，默认情况下抽取进程是以追加的形式将更新信息包含在此，了解更多请移步官方文档添加这样的进程，首先需要编写它的配置文件：ggsci&gt;edit param ext_demoext_demo是我们取的一个进程名字，ogg规定进程名字不能超过8个字符。ggsci会在dirprm文件夹下新建ext_demo.prm文件。该文件就是来描述ext_demo进程的配置。其他进程也是同理，都是利用prm配置文件来维护配置信息。在ggsci下可以直接输入prm文件内容：</div></pre></td></tr></table></figure>
+
+Extract ext_demo
+Exttrail ./dirdat/a1
+userid  xxx  password xxx  
+setenv (NLS_LANG=AMERICAN_AMERICA.ZHS16GBK)
+getEnv (JAVA_HOME)
+getEnv (LD_LIBRARY_PATH)
+getEnv (PATH)
+Table  OGG_TEST1;
+</code></pre><p>需要注意的是，Exttrail是生成trail文件的地址，a1是trail文件名称，ogg规定trail文件名称不能超过2个字符。Table 表示是需要抽取表，userid  xxx  password xxx  是数据库的用户名和密码。<br>配置完抽取进程，把进程启动起来仍需要一下的指令：<br>–添加进程</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ggsci &gt;add extract ext_demo, Tranlog, begin now</div><div class="line">```--链接进程到trail文件</div></pre></td></tr></table></figure>
+<p>ggsci &gt;add exttrail ./dirdat/a1, Extract ext_demo, megabytes 100<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">--登录数据库</div></pre></td></tr></table></figure></p>
+<p>ggsci &gt;dblogin userid yourname ,password yourpassword </p>
+<pre><code>
+--在数据库中注册进程
 
-ggsci &gt;add exttrail ./dirdat/a1, Extract ext_demo, megabytes 100
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">--登录数据库</div></pre></td></tr></table></figure>
-
-ggsci &gt;dblogin userid yourname ,password yourpassword
-</code></pre><p>–在数据库中注册进程</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ggsci &gt;REGISTER EXTRACT ext_demo LOGRETENTION</div><div class="line">```--开启进程</div></pre></td></tr></table></figure>
-<p>ggsci &gt;start ext_demo</p>
-<pre><code>
-可以通过info 指令来查看进程是否正确启动
 
+ggsci &gt;start ext_demo
+</code></pre><p>可以通过info 指令来查看进程是否正确启动</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ggsci &gt;info ext_demo</div><div class="line">```如果没有启动可以查看启动日志，通过错误排查来正确启动抽取进程，一般而言都是配置错误。</div></pre></td></tr></table></figure>
-
-ggsci&gt; view report ext_demo
-</code></pre><h2 id="分发进程"><a href="#分发进程" class="headerlink" title="分发进程"></a>分发进程</h2><p>分发进程实际上运用了Ogg的一个子项目Oracle GoldenGate Application Adapters 。该项目支持将trail文件转化成一定格式的同步文本信息，可以将该信息写入本地文件，或者获取利用Java adapter打包成jms消息，发布在队列中。相反，Adapters还支持消费对应的jms消息，将同步动作执行在目标数据库。总之是非常强大和灵活的组件。<br>12版本以后，Oracle GoldenGate Application Adapters 支持两种运行模式，一种是独立模式，一种是打包模式。独立模式是将Adapters进程运行在一个独立的ogg服务之中，利用一个独立的manager进程维护，所以一般完成一个完整的服务，需要启动两个Ogg服务，一个专门负责抽取，一个专门负责分发；打包模式相当于把这个pack service 打包到ogg基础服务之中，所以可以利用一个ogg服务完成抽取和分发。这两种模式各有利弊。pack service必须保持ogg核心模块和Adapters的版本完全一致。独立模式，版本限制相对小，甚至11版本的ogg生成trail也能被12版本的Adapters正确解析。<br><img src="http://ocerie2vm.bkt.clouddn.com/GUID-93A1AB03-B79A-4451-86DA-3040C3ABD12E-default.gif" alt="img"></p>
-<p>图.1 完整的分发过程<br>正如图上所诉，分发进程其实也是一个extract，这个是一个特殊的extract，extract其实是用C写的，它可以利用一个库文件来启动jvm和JAVA user exit ，以及jms服务。在图中有两个地方需要解释一下，也就是我们这个文档没有描述到的地方。一个是pump extraxt和collector。文档中因为分发进程和抽取进程是在同一个物理机之上，所以不存在trail文件的传输。而图中是利用pump extraxt将trail文件推送到远端，远端的collector将trail保存在本地，以供分发进程使用。而在本文，我们跳过了这个步骤。<br>在图中，我们可以看到分发进程需要一个源端定义文件才能了解数据库的元数据，这是因为分发进程它是可以和远端独立的，只有利用源端定义文件才能让分发进程了解。元信息一般包括：数据库版本，字符集，需要同步信息的字段，类型，数目等等，这些都是必须需要的。</p>
-<ol>
-<li>生成def文件<br>这个一步是在核心ogg服务中完成的。Adapters pack service 无法完成生成定义文件，它相当于一个精简版的ogg，没法进行抽取。</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ggsci &gt; Edit Param javadef_demo</div><div class="line">```输入：</div></pre></td></tr></table></figure>
-<p>userid xxx password xxx<br>defsfile ./dirdef/javadef_demo.def<br>Table .OGG_TEST1;</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Defsfile 是描述def文件的保存地址。然后利用defgen 生成def文件。Defgen工具在ogg 根目录之下。</div></pre></td></tr></table></figure>
-<p>./defgen paramfile dirprm/javadef_demo.prm</p>
+<p>ggsci&gt; view report ext_demo</p>
 <pre><code>
-这样就在dirdef文件夹下生成了以def为扩展名的描述文件，这个文件是文本形式保存的，有兴趣可以直接打开它。
-2.    编辑java  adapater 配置文件
-java adapter配置文件是我们非常熟悉的JAVA程序配置文件，以扩展名properties结尾。该配置文件配置了java adapter 向哪个队列分发，日志文件配置，过滤器，事件handler等等，具体的配置可以参考官方文档。
-这里我给一个一般配置
+## 分发进程
+分发进程实际上运用了Ogg的一个子项目Oracle GoldenGate Application Adapters 。该项目支持将trail文件转化成一定格式的同步文本信息，可以将该信息写入本地文件，或者获取利用Java adapter打包成jms消息，发布在队列中。相反，Adapters还支持消费对应的jms消息，将同步动作执行在目标数据库。总之是非常强大和灵活的组件。
+12版本以后，Oracle GoldenGate Application Adapters 支持两种运行模式，一种是独立模式，一种是打包模式。独立模式是将Adapters进程运行在一个独立的ogg服务之中，利用一个独立的manager进程维护，所以一般完成一个完整的服务，需要启动两个Ogg服务，一个专门负责抽取，一个专门负责分发；打包模式相当于把这个pack service 打包到ogg基础服务之中，所以可以利用一个ogg服务完成抽取和分发。这两种模式各有利弊。pack service必须保持ogg核心模块和Adapters的版本完全一致。独立模式，版本限制相对小，甚至11版本的ogg生成trail也能被12版本的Adapters正确解析。
+![img](http://ocerie2vm.bkt.clouddn.com/GUID-93A1AB03-B79A-4451-86DA-3040C3ABD12E-default.gif)
 
+图.1 完整的分发过程
+正如图上所诉，分发进程其实也是一个extract，这个是一个特殊的extract，extract其实是用C写的，它可以利用一个库文件来启动jvm和JAVA user exit ，以及jms服务。在图中有两个地方需要解释一下，也就是我们这个文档没有描述到的地方。一个是pump extraxt和collector。文档中因为分发进程和抽取进程是在同一个物理机之上，所以不存在trail文件的传输。而图中是利用pump extraxt将trail文件推送到远端，远端的collector将trail保存在本地，以供分发进程使用。而在本文，我们跳过了这个步骤。
+在图中，我们可以看到分发进程需要一个源端定义文件才能了解数据库的元数据，这是因为分发进程它是可以和远端独立的，只有利用源端定义文件才能让分发进程了解。元信息一般包括：数据库版本，字符集，需要同步信息的字段，类型，数目等等，这些都是必须需要的。
+1.    生成def文件
+这个一步是在核心ogg服务中完成的。Adapters pack service 无法完成生成定义文件，它相当于一个精简版的ogg，没法进行抽取。
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">#定义两种handergg.handlerlist=sample_jms,singlefile#引入jms服务Jar包gg.classpath=./ggjava/resources/lib/activemq-all-5.9.0.jar#初始化jmsjava.naming.factory.url.pkgs=org.apache.activemq.jndijava.naming.factory.initial=org.apache.activemq.jndi.ActiveMQInitialContextFactoryjava.naming.provider.url=tcp://localhost:8616#singlefile hander 将消息保存在本地文件gg.handler.sample_test.type=singlefilegg.handler.sample_test.file=output.xmlgg.handler.sample_test.format=xml#jms hander 将消息保存分发在队列之中gg.handler.sample_jms.type=jmsgg.handler.sample_jms.format=xmlgg.handler.sample_jms.format.mode=txgg.handler.sample_jms.destinationType=queuegg.handler.sample_jms.destination=dynamicQueues/TEST1.Qgg.handler.sample_jms.connectionFactory=ConnectionFactorygoldengate.userexit.nochkpt=TRUE# tx timestamp datatbase local (default) or UTC timestampgoldengate.userexit.timestamp=utcgoldengate.userexit.buffertxs=truegoldengate.log.modules=UTIL,UEUTIL,TXSTORE,UTILS,JAVAWRITER,JAVAUSEREXITgoldengate.log.level=INFOgoldengate.log.tostdout=falsegoldengate.log.tofile=truegoldengate.log.logname=logs/cuserexit###############################################################goldengate.userexit.writers=javawriterjavawriter.stats.display=TRUEjavawriter.stats.full=TRUE##初始化参数，注意ggjava.jar路径正确，该jar包包含了ogg的java服务。javawriter.bootoptions=-Xmx1G -ms500m -Djava.class.path=ggjava/ggjava.jar:dirlib/custom.jar -Dlog4j.configuration=log4j.properties</div><div class="line"></div><div class="line">```3.	新建分发进程分发进程和抽取进程一样也需要配置文件。ggsci&gt;Edit Param jue_demo我们定义了一个分发进程jue_demo配置文件定义如下：</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ggsci &gt; Edit Param javadef_demo</div><div class="line">```输入：</div></pre></td></tr></table></figure>
 
-EXTRACT jue_demo
-setEnv ( GGS_USEREXIT_CONF = &quot;./dirprm/javaue_demo.properties&quot; )
-GetEnv (JAVA_HOME)
-GetEnv (PATH)
-GetEnv (LD_LIBRARY_PATH)
-GetEnv (LIBPATH)
-CUserExit libggjava_ue.so CUSEREXIT PASSTHRU INCLUDEUPDATEBEFORES
-sourceDefs ./dirdef/javadef_demo.def 
-getUpdateBefores
+userid xxx password xxx
+defsfile ./dirdef/javadef_demo.def 
 Table .OGG_TEST1;
-</code></pre><p>需要注意的地方BENWEN标记住了，包括了我们的之前生成的定义def文件和properties配置文件.其中libggjava_ue.so是该进程调用jvm虚拟机的C语言库，如果这个有问题，分发进程就没法启动虚拟机，需要注意。<br>—-添加进程，指向对应的trail文件,trail文件是上文生成的文件。</p>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Defsfile 是描述def文件的保存地址。然后利用defgen 生成def文件。Defgen工具在ogg 根目录之下。</div></pre></td></tr></table></figure>
+
+./defgen paramfile dirprm/javadef_demo.prm
+</code></pre><p>这样就在dirdef文件夹下生成了以def为扩展名的描述文件，这个文件是文本形式保存的，有兴趣可以直接打开它。</p>
+<ol>
+<li>编辑java  adapater 配置文件<br>java adapter配置文件是我们非常熟悉的JAVA程序配置文件，以扩展名properties结尾。该配置文件配置了java adapter 向哪个队列分发，日志文件配置，过滤器，事件handler等等，具体的配置可以参考官方文档。<br>这里我给一个一般配置</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">#定义两种handergg.handlerlist=sample_jms,singlefile#引入jms服务Jar包gg.classpath=./ggjava/resources/lib/activemq-all-5.9.0.jar#初始化jmsjava.naming.factory.url.pkgs=org.apache.activemq.jndijava.naming.factory.initial=org.apache.activemq.jndi.ActiveMQInitialContextFactoryjava.naming.provider.url=tcp://localhost:8616#singlefile hander 将消息保存在本地文件gg.handler.sample_test.type=singlefilegg.handler.sample_test.file=output.xmlgg.handler.sample_test.format=xml#jms hander 将消息保存分发在队列之中gg.handler.sample_jms.type=jmsgg.handler.sample_jms.format=xmlgg.handler.sample_jms.format.mode=txgg.handler.sample_jms.destinationType=queuegg.handler.sample_jms.destination=dynamicQueues/TEST1.Qgg.handler.sample_jms.connectionFactory=ConnectionFactorygoldengate.userexit.nochkpt=TRUE# tx timestamp datatbase local (default) or UTC timestampgoldengate.userexit.timestamp=utcgoldengate.userexit.buffertxs=truegoldengate.log.modules=UTIL,UEUTIL,TXSTORE,UTILS,JAVAWRITER,JAVAUSEREXITgoldengate.log.level=INFOgoldengate.log.tostdout=falsegoldengate.log.tofile=truegoldengate.log.logname=logs/cuserexit###############################################################goldengate.userexit.writers=javawriterjavawriter.stats.display=TRUEjavawriter.stats.full=TRUE##初始化参数，注意ggjava.jar路径正确，该jar包包含了ogg的java服务。javawriter.bootoptions=-Xmx1G -ms500m -Djava.class.path=ggjava/ggjava.jar:dirlib/custom.jar -Dlog4j.configuration=log4j.properties</div><div class="line"></div><div class="line">```3.	新建分发进程分发进程和抽取进程一样也需要配置文件。ggsci&gt;Edit Param jue_demo我们定义了一个分发进程jue_demo配置文件定义如下：</div></pre></td></tr></table></figure>
+<p>EXTRACT jue_demo<br>setEnv ( GGS_USEREXIT_CONF = “./dirprm/javaue_demo.properties” )<br>GetEnv (JAVA_HOME)<br>GetEnv (PATH)<br>GetEnv (LD_LIBRARY_PATH)<br>GetEnv (LIBPATH)<br>CUserExit libggjava_ue.so CUSEREXIT PASSTHRU INCLUDEUPDATEBEFORES<br>sourceDefs ./dirdef/javadef_demo.def<br>getUpdateBefores<br>Table .OGG_TEST1;<br>```</p>
+<p>需要注意的地方BENWEN标记住了，包括了我们的之前生成的定义def文件和properties配置文件.其中libggjava_ue.so是该进程调用jvm虚拟机的C语言库，如果这个有问题，分发进程就没法启动虚拟机，需要注意。<br>—-添加进程，指向对应的trail文件,trail文件是上文生成的文件。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ggsci &gt;ADD extract jue_demo, extTrailSource ./dirdat/a1ggsci &gt;start extract jue_demo</div></pre></td></tr></table></figure>
 <p>如果启动成功了jue_demo就是在running状态。只有当抽取进程和分发进程同时在running状态，队列才能正确获取到同步消息。</p>
 
