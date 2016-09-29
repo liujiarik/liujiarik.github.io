@@ -83,7 +83,7 @@
 <meta property="og:url" content="http://yoursite.com/2016/09/07/Oracle golden gate 分发同步消息至ActiveMQ/index.html">
 <meta property="og:site_name" content="liujiarik的站">
 <meta property="og:description" content="如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ引言Oracle golden gate是甲骨文推出的一款数据库同步软件，可以实现异构数据库之间的亚秒级同步，它不仅仅支持Oracle，还支持Mysql和一些业界常用数据库。Ogg可以自动抽取表级数据的动态变化，直接将同步信息作用于目标数据库。然而，在某一些场景之中，我们并不需要将同步信息直接作用于目标数据库，而是将">
-<meta property="og:updated_time" content="2016-09-29T09:22:28.000Z">
+<meta property="og:updated_time" content="2016-09-29T09:24:21.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ">
 <meta name="twitter:description" content="如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ引言Oracle golden gate是甲骨文推出的一款数据库同步软件，可以实现异构数据库之间的亚秒级同步，它不仅仅支持Oracle，还支持Mysql和一些业界常用数据库。Ogg可以自动抽取表级数据的动态变化，直接将同步信息作用于目标数据库。然而，在某一些场景之中，我们并不需要将同步信息直接作用于目标数据库，而是将">
@@ -294,20 +294,25 @@
 ## 生成必要文件夹开启Manager进程
 进入交互终端
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./ggsci</div></pre></td></tr></table></figure>
-
+./ggsci
 1.生成必要文件夹
 这一步，主要是生成一些OGG服务需要的文件夹，这些文件夹是OGG服务的默认路径，比如，`dirprm`文件夹保存这各种参数文件，ogg会默认从这个文件夹中读取运行参数。
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ggsci &gt; create subdirs</div></pre></td></tr></table></figure>
-
+ggsci &gt; create subdirs
 2.启动管理进程
 启动管理进程是配置其他进程的第一步，不然没法启动其他进程。
 
 * 配置管理进程参数
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">GGSCI &gt; edit params mgr</div><div class="line">port 7839 </div><div class="line">DYNAMICPORTLIST 7840-7850</div><div class="line">AUTOSTART EXTRACT *</div><div class="line">AUTORESTART EXTRACT *</div><div class="line">PURGEOLDEXTRACTS ./dirdat/*,usecheckpoints, minkeepdays 7</div><div class="line">LAGREPORTHOURS 1</div><div class="line">LAGINFOMINUTES 30</div><div class="line">LAGCRITICALMINUTES 45</div></pre></td></tr></table></figure>
-
+GGSCI &gt; edit params mgr
+port 7839 
+DYNAMICPORTLIST 7840-7850
+AUTOSTART EXTRACT *
+AUTORESTART EXTRACT *
+PURGEOLDEXTRACTS ./dirdat/*,usecheckpoints, minkeepdays 7
+LAGREPORTHOURS 1
+LAGINFOMINUTES 30
+LAGCRITICALMINUTES 45
 需要注意的是：
 `PORT`：指定服务监听端口；这里以7839为例，默认端口为7809
 `DYNAMICPORTLIST`：动态端口：可以制定最大256个可用端口的动态列表，当指定的端口不可用时，管理进程将会从列表中选择一个可用的端口，源端和目标段的Collector、Replicat、GGSCI进程通信也会使用这些端口；
@@ -320,11 +325,19 @@
 
 * 启动
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GGSCI &gt; start mgr</div></pre></td></tr></table></figure>
-
+GGSCI &gt; start mgr
 启动成功之后可以利用一下指令查看所有进程的info，可以看到`MANAGER`进程已经成功启动：
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">GGSCI &gt; info all</div><div class="line">Program     Status     Group       Lag at Chkpt  Time Since Chkpt</div><div class="line">MANAGER     RUNNING</div><div class="line">```## Extract进程Extract抽取进程是将redo log转化成trail文件的一个必要的过程。Trail文件是一种的特殊的文件格式，它有自己专属的文件头，包含了格式化的同步信息，默认情况下抽取进程是以追加的形式将更新信息包含在此，了解更多请移步官方文档添加这样的进程，首先需要编写它的配置文件：ggsci&gt;edit param ext_demoext_demo是我们取的一个进程名字，ogg规定进程名字不能超过8个字符。ggsci会在dirprm文件夹下新建ext_demo.prm文件。该文件就是来描述ext_demo进程的配置。其他进程也是同理，都是利用prm配置文件来维护配置信息。在ggsci下可以直接输入prm文件内容：</div></pre></td></tr></table></figure>
+GGSCI &gt; info all
+Program     Status     Group       Lag at Chkpt  Time Since Chkpt
+MANAGER     RUNNING
+
+## Extract进程
+Extract抽取进程是将redo log转化成trail文件的一个必要的过程。Trail文件是一种的特殊的文件格式，它有自己专属的文件头，包含了格式化的同步信息，默认情况下抽取进程是以追加的形式将更新信息包含在此，
+了解更多请移步官方文档
+添加这样的进程，首先需要编写它的配置文件：
+ggsci&gt;edit param ext_demo
+ext_demo是我们取的一个进程名字，ogg规定进程名字不能超过8个字符。ggsci会在dirprm文件夹下新建ext_demo.prm文件。该文件就是来描述ext_demo进程的配置。其他进程也是同理，都是利用prm配置文件来维护配置信息。在ggsci下可以直接输入prm文件内容：
 
 Extract ext_demo
 Exttrail ./dirdat/a1
@@ -334,20 +347,37 @@ getEnv (JAVA_HOME)
 getEnv (LD_LIBRARY_PATH)
 getEnv (PATH)
 Table  OGG_TEST1;
-</code></pre><p>需要注意的是，Exttrail是生成trail文件的地址，a1是trail文件名称，ogg规定trail文件名称不能超过2个字符。Table 表示是需要抽取表，userid  xxx  password xxx  是数据库的用户名和密码。<br>配置完抽取进程，把进程启动起来仍需要一下的指令：<br>–添加进程</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ggsci &gt;add extract ext_demo, Tranlog, begin now</div><div class="line">```--链接进程到trail文件</div></pre></td></tr></table></figure>
-<p>ggsci &gt;add exttrail ./dirdat/a1, Extract ext_demo, megabytes 100<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">--登录数据库</div></pre></td></tr></table></figure></p>
-<p>ggsci &gt;dblogin userid yourname ,password yourpassword </p>
-<pre><code>
+
+需要注意的是，Exttrail是生成trail文件的地址，a1是trail文件名称，ogg规定trail文件名称不能超过2个字符。Table 表示是需要抽取表，userid  xxx  password xxx  是数据库的用户名和密码。
+配置完抽取进程，把进程启动起来仍需要一下的指令： 
+--添加进程
+
+ggsci &gt;add extract ext_demo, Tranlog, begin now
+
+--链接进程到trail文件
+
+ggsci &gt;add exttrail ./dirdat/a1, Extract ext_demo, megabytes 100
+
+--登录数据库
+
+ggsci &gt;dblogin userid yourname ,password yourpassword 
+
 --在数据库中注册进程
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ggsci &gt;REGISTER EXTRACT ext_demo LOGRETENTION</div><div class="line">```--开启进程</div></pre></td></tr></table></figure>
+ggsci &gt;REGISTER EXTRACT ext_demo LOGRETENTION
+
+--开启进程
 
 ggsci &gt;start ext_demo
-</code></pre><p>可以通过info 指令来查看进程是否正确启动</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ggsci &gt;info ext_demo</div><div class="line">```如果没有启动可以查看启动日志，通过错误排查来正确启动抽取进程，一般而言都是配置错误。</div></pre></td></tr></table></figure>
-<p>ggsci&gt; view report ext_demo</p>
-<pre><code>
+
+可以通过info 指令来查看进程是否正确启动
+
+ggsci &gt;info ext_demo
+
+如果没有启动可以查看启动日志，通过错误排查来正确启动抽取进程，一般而言都是配置错误。
+
+ggsci&gt; view report ext_demo
+
 ## 分发进程
 分发进程实际上运用了Ogg的一个子项目Oracle GoldenGate Application Adapters 。该项目支持将trail文件转化成一定格式的同步文本信息，可以将该信息写入本地文件，或者获取利用Java adapter打包成jms消息，发布在队列中。相反，Adapters还支持消费对应的jms消息，将同步动作执行在目标数据库。总之是非常强大和灵活的组件。
 12版本以后，Oracle GoldenGate Application Adapters 支持两种运行模式，一种是独立模式，一种是打包模式。独立模式是将Adapters进程运行在一个独立的ogg服务之中，利用一个独立的manager进程维护，所以一般完成一个完整的服务，需要启动两个Ogg服务，一个专门负责抽取，一个专门负责分发；打包模式相当于把这个pack service 打包到ogg基础服务之中，所以可以利用一个ogg服务完成抽取和分发。这两种模式各有利弊。pack service必须保持ogg核心模块和Adapters的版本完全一致。独立模式，版本限制相对小，甚至11版本的ogg生成trail也能被12版本的Adapters正确解析。
@@ -359,23 +389,39 @@ ggsci &gt;start ext_demo
 1.    生成def文件
 这个一步是在核心ogg服务中完成的。Adapters pack service 无法完成生成定义文件，它相当于一个精简版的ogg，没法进行抽取。
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ggsci &gt; Edit Param javadef_demo</div><div class="line">```输入：</div></pre></td></tr></table></figure>
+ggsci &gt; Edit Param javadef_demo
+
+输入：
 
 userid xxx password xxx
 defsfile ./dirdef/javadef_demo.def 
 Table .OGG_TEST1;
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Defsfile 是描述def文件的保存地址。然后利用defgen 生成def文件。Defgen工具在ogg 根目录之下。</div></pre></td></tr></table></figure>
+
+Defsfile 是描述def文件的保存地址。
+然后利用defgen 生成def文件。Defgen工具在ogg 根目录之下。
 
 ./defgen paramfile dirprm/javadef_demo.prm
-</code></pre><p>这样就在dirdef文件夹下生成了以def为扩展名的描述文件，这个文件是文本形式保存的，有兴趣可以直接打开它。</p>
+
+这样就在dirdef文件夹下生成了以def为扩展名的描述文件，这个文件是文本形式保存的，有兴趣可以直接打开它。
+2.    编辑java  adapater 配置文件
+java adapter配置文件是我们非常熟悉的JAVA程序配置文件，以扩展名properties结尾。该配置文件配置了java adapter 向哪个队列分发，日志文件配置，过滤器，事件handler等等，具体的配置可以参考官方文档。
+这里我给一个一般配置
+</code></pre><p>#定义两种hander<br>gg.handlerlist=sample_jms,singlefile</p>
+<p>#引入jms服务Jar包<br>gg.classpath=./ggjava/resources/lib/activemq-all-5.9.0.jar</p>
+<p>#初始化jms<br>java.naming.factory.url.pkgs=org.apache.activemq.jndi<br>java.naming.factory.initial=org.apache.activemq.jndi.ActiveMQInitialContextFactory<br>java.naming.provider.url=tcp://localhost:8616</p>
+<p>#singlefile hander 将消息保存在本地文件<br>gg.handler.sample_test.type=singlefile<br>gg.handler.sample_test.file=output.xml<br>gg.handler.sample_test.format=xml</p>
+<p>#jms hander 将消息保存分发在队列之中<br>gg.handler.sample_jms.type=jms<br>gg.handler.sample_jms.format=xml<br>gg.handler.sample_jms.format.mode=tx<br>gg.handler.sample_jms.destinationType=queue<br>gg.handler.sample_jms.destination=dynamicQueues/TEST1.Q<br>gg.handler.sample_jms.connectionFactory=ConnectionFactory<br>goldengate.userexit.nochkpt=TRUE</p>
+<h1 id="tx-timestamp-datatbase-local-default-or-UTC-timestamp"><a href="#tx-timestamp-datatbase-local-default-or-UTC-timestamp" class="headerlink" title="tx timestamp datatbase local (default) or UTC timestamp"></a>tx timestamp datatbase local (default) or UTC timestamp</h1><p>goldengate.userexit.timestamp=utc<br>goldengate.userexit.buffertxs=true<br>goldengate.log.modules=UTIL,UEUTIL,TXSTORE,UTILS,JAVAWRITER,JAVAUSEREXIT<br>goldengate.log.level=INFO<br>goldengate.log.tostdout=false<br>goldengate.log.tofile=true<br>goldengate.log.logname=logs/cuserexit</p>
+<p>###############################################################<br>goldengate.userexit.writers=javawriter<br>javawriter.stats.display=TRUE<br>javawriter.stats.full=TRUE</p>
+<p>##初始化参数，注意ggjava.jar路径正确，该jar包包含了ogg的java服务。<br>javawriter.bootoptions=-Xmx1G -ms500m -Djava.class.path=ggjava/ggjava.jar:dirlib/custom.jar -Dlog4j.configuration=log4j.properties</p>
+<p>```</p>
 <ol>
-<li>编辑java  adapater 配置文件<br>java adapter配置文件是我们非常熟悉的JAVA程序配置文件，以扩展名properties结尾。该配置文件配置了java adapter 向哪个队列分发，日志文件配置，过滤器，事件handler等等，具体的配置可以参考官方文档。<br>这里我给一个一般配置</li>
+<li>新建分发进程<br>分发进程和抽取进程一样也需要配置文件。<br>ggsci&gt;Edit Param jue_demo<br>我们定义了一个分发进程jue_demo<br>配置文件定义如下：</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">#定义两种handergg.handlerlist=sample_jms,singlefile#引入jms服务Jar包gg.classpath=./ggjava/resources/lib/activemq-all-5.9.0.jar#初始化jmsjava.naming.factory.url.pkgs=org.apache.activemq.jndijava.naming.factory.initial=org.apache.activemq.jndi.ActiveMQInitialContextFactoryjava.naming.provider.url=tcp://localhost:8616#singlefile hander 将消息保存在本地文件gg.handler.sample_test.type=singlefilegg.handler.sample_test.file=output.xmlgg.handler.sample_test.format=xml#jms hander 将消息保存分发在队列之中gg.handler.sample_jms.type=jmsgg.handler.sample_jms.format=xmlgg.handler.sample_jms.format.mode=txgg.handler.sample_jms.destinationType=queuegg.handler.sample_jms.destination=dynamicQueues/TEST1.Qgg.handler.sample_jms.connectionFactory=ConnectionFactorygoldengate.userexit.nochkpt=TRUE# tx timestamp datatbase local (default) or UTC timestampgoldengate.userexit.timestamp=utcgoldengate.userexit.buffertxs=truegoldengate.log.modules=UTIL,UEUTIL,TXSTORE,UTILS,JAVAWRITER,JAVAUSEREXITgoldengate.log.level=INFOgoldengate.log.tostdout=falsegoldengate.log.tofile=truegoldengate.log.logname=logs/cuserexit###############################################################goldengate.userexit.writers=javawriterjavawriter.stats.display=TRUEjavawriter.stats.full=TRUE##初始化参数，注意ggjava.jar路径正确，该jar包包含了ogg的java服务。javawriter.bootoptions=-Xmx1G -ms500m -Djava.class.path=ggjava/ggjava.jar:dirlib/custom.jar -Dlog4j.configuration=log4j.properties</div><div class="line"></div><div class="line">```3.	新建分发进程分发进程和抽取进程一样也需要配置文件。ggsci&gt;Edit Param jue_demo我们定义了一个分发进程jue_demo配置文件定义如下：</div></pre></td></tr></table></figure>
-<p>EXTRACT jue_demo<br>setEnv ( GGS_USEREXIT_CONF = “./dirprm/javaue_demo.properties” )<br>GetEnv (JAVA_HOME)<br>GetEnv (PATH)<br>GetEnv (LD_LIBRARY_PATH)<br>GetEnv (LIBPATH)<br>CUserExit libggjava_ue.so CUSEREXIT PASSTHRU INCLUDEUPDATEBEFORES<br>sourceDefs ./dirdef/javadef_demo.def<br>getUpdateBefores<br>Table .OGG_TEST1;<br>```</p>
+<p>EXTRACT jue_demo<br>setEnv ( GGS_USEREXIT_CONF = “./dirprm/javaue_demo.properties” )<br>GetEnv (JAVA_HOME)<br>GetEnv (PATH)<br>GetEnv (LD_LIBRARY_PATH)<br>GetEnv (LIBPATH)<br>CUserExit libggjava_ue.so CUSEREXIT PASSTHRU INCLUDEUPDATEBEFORES<br>sourceDefs ./dirdef/javadef_demo.def<br>getUpdateBefores<br>Table .OGG_TEST1;</p>
 <p>需要注意的地方BENWEN标记住了，包括了我们的之前生成的定义def文件和properties配置文件.其中libggjava_ue.so是该进程调用jvm虚拟机的C语言库，如果这个有问题，分发进程就没法启动虚拟机，需要注意。<br>—-添加进程，指向对应的trail文件,trail文件是上文生成的文件。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ggsci &gt;ADD extract jue_demo, extTrailSource ./dirdat/a1ggsci &gt;start extract jue_demo</div></pre></td></tr></table></figure>
+<p>ggsci &gt;ADD extract jue_demo, extTrailSource ./dirdat/a1<br>ggsci &gt;start extract jue_demo</p>
 <p>如果启动成功了jue_demo就是在running状态。只有当抽取进程和分发进程同时在running状态，队列才能正确获取到同步消息。</p>
 
       
@@ -533,7 +579,7 @@ Table .OGG_TEST1;
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#如何利用Oracle-golden-gate-分发数据库同步消息至ActiveMQ"><span class="nav-number">1.</span> <span class="nav-text">如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OGG数据同步的重要概念"><span class="nav-number">1.2.</span> <span class="nav-text">OGG数据同步的重要概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#让表可logging"><span class="nav-number">1.3.</span> <span class="nav-text">让表可logging</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#如何利用Oracle-golden-gate-分发数据库同步消息至ActiveMQ"><span class="nav-number">1.</span> <span class="nav-text">如何利用Oracle golden gate 分发数据库同步消息至ActiveMQ</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OGG数据同步的重要概念"><span class="nav-number">1.2.</span> <span class="nav-text">OGG数据同步的重要概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#让表可logging"><span class="nav-number">1.3.</span> <span class="nav-text">让表可logging</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#tx-timestamp-datatbase-local-default-or-UTC-timestamp"><span class="nav-number">2.</span> <span class="nav-text">tx timestamp datatbase local (default) or UTC timestamp</span></a></li></ol></div>
             
           </div>
         </section>
